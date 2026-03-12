@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="gece">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YKS 2026 — Geri Sayım</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080810" id="theme-color-meta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YKS 2026">
+<link rel="apple-touch-icon" href="icon-192.svg">
+
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+[data-theme="gece"] {
+  --bg:#080810; --border:#1c1c30; --card:#10101e;
+  --accent:#7c6aff; --accent2:#ff6b6b; --text:#e8e6f0; --muted:#4a4870;
+  --shine:rgba(124,106,255,0.15); --tc:#080810;
+}
+[data-theme="sabah"] {
+  --bg:#fdf6ec; --border:#e8d8c4; --card:#fff9f3;
+  --accent:#d4541a; --accent2:#e8a030; --text:#2a1a0a; --muted:#a08060;
+  --shine:rgba(212,84,26,0.10); --tc:#fdf6ec;
+}
+[data-theme="orman"] {
+  --bg:#080f0a; --border:#162018; --card:#0a1410;
+  --accent:#4caf78; --accent2:#a8e060; --text:#d8eed8; --muted:#2e4a34;
+  --shine:rgba(76,175,120,0.12); --tc:#080f0a;
+}
+[data-theme="buz"] {
+  --bg:#f0f6ff; --border:#c8dcf0; --card:#eaf4ff;
+  --accent:#1a6db5; --accent2:#0ea8d8; --text:#0a1e3a; --muted:#6090b8;
+  --shine:rgba(26,109,181,0.10); --tc:#f0f6ff;
+}
+[data-theme="alev"] {
+  --bg:#0e0800; --border:#2a1800; --card:#140a00;
+  --accent:#ff9500; --accent2:#ff3d00; --text:#fff0d0; --muted:#5a3800;
+  --shine:rgba(255,149,0,0.15); --tc:#0e0800;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body {
+  background:var(--bg); color:var(--text);
+  font-family:'Crimson Pro',Georgia,serif;
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  transition:background .5s,color .5s;
+  overflow-x:hidden; padding:2rem 1rem;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px; opacity:.5; pointer-events:none; transition:opacity .5s;
+}
+.glow {
+  position:fixed; top:-10%; left:50%; transform:translateX(-50%);
+  width:700px; height:500px;
+  background:radial-gradient(ellipse,var(--shine) 0%,transparent 65%);
+  pointer-events:none; transition:background .5s;
+}
+.wrap{width:min(96vw,700px);position:relative;z-index:1;}
+
+.theme-bar{display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:2rem;flex-wrap:wrap;animation:fadeIn .6s ease both;}
+.tbtn{border:1.5px solid var(--border);border-radius:100px;padding:.28rem .9rem;font-family:'Crimson Pro',serif;font-size:.82rem;font-style:italic;cursor:pointer;background:var(--card);color:var(--muted);transition:border-color .2s,color .2s,background .2s,transform .15s;letter-spacing:.04em;}
+.tbtn:hover{color:var(--text);border-color:var(--accent);transform:translateY(-1px);}
+.tbtn.on{background:var(--accent);color:var(--bg);border-color:var(--accent);font-style:normal;font-weight:600;}
+
+.header{text-align:center;margin-bottom:2.8rem;animation:slideDown .7s ease both;}
+.eyebrow{font-size:.7rem;letter-spacing:.35em;color:var(--accent);text-transform:uppercase;font-family:'Oswald',sans-serif;font-weight:400;margin-bottom:.5rem;transition:color .4s;}
+h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(4rem,14vw,8rem);letter-spacing:.04em;line-height:.88;color:var(--text);transition:color .4s;display:inline-block;}
+h1::after{content:'';display:block;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;margin-top:.3rem;transition:background .4s;}
+.dateline{font-size:1rem;color:var(--muted);margin-top:.8rem;font-style:italic;letter-spacing:.05em;transition:color .4s;}
+
+.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.2rem;animation:slideUp .7s .15s ease both;}
+@media(max-width:460px){.countdown{grid-template-columns:repeat(2,1fr);}}
+.unit{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.6rem .5rem 1.1rem;text-align:center;position:relative;overflow:hidden;transition:background .4s,border-color .4s,transform .2s;}
+.unit:hover{transform:translateY(-4px);border-color:var(--accent);}
+.unit::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity .3s;}
+.unit:hover::before{opacity:1;}
+.unit-sep{position:absolute;right:-.45rem;top:50%;transform:translateY(-50%);font-family:'Oswald',sans-serif;font-size:1.6rem;color:var(--border);font-weight:300;pointer-events:none;transition:color .4s;z-index:2;}
+.unit:last-child .unit-sep{display:none;}
+.num{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(2.8rem,8vw,4rem);color:var(--accent);line-height:1;display:block;transition:color .4s;text-shadow:0 0 30px var(--shine);}
+.num.pop{animation:pop .3s ease;}
+.lbl{font-size:.62rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;font-family:'Oswald',sans-serif;font-weight:400;display:block;margin-top:.5rem;transition:color .4s;}
+
+.weeks{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.6rem;display:flex;align-items:center;justify-content:center;gap:.8rem;animation:slideUp .7s .22s ease both;transition:background .4s,border-color .4s;}
+.wnum{font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;color:var(--accent2);transition:color .4s;}
+.wtxt{font-size:.95rem;color:var(--muted);font-style:italic;transition:color .4s;line-height:1.4;}
+
+.done{text-align:center;padding:3rem 1rem;animation:fadeIn .7s ease both;}
+.done-icon{font-size:4rem;margin-bottom:1rem;}
+.done h2{font-family:'Oswald',sans-serif;font-size:2.8rem;letter-spacing:.06em;color:var(--accent);}
+.done p{color:var(--muted);margin-top:.6rem;font-style:italic;}
+
+@keyframes slideDown{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <div class="theme-bar">
+    <button class="tbtn on"  onclick="setTheme('gece',this)">🌙 Gece</button>
+    <button class="tbtn"     onclick="setTheme('sabah',this)">🌅 Sabah</button>
+    <button class="tbtn"     onclick="setTheme('orman',this)">🌿 Orman</button>
+    <button class="tbtn"     onclick="setTheme('buz',this)">❄️ Buz</button>
+    <button class="tbtn"     onclick="setTheme('alev',this)">🔥 Alev</button>
+  </div>
+  <div class="header">
+    <div class="eyebrow">2026 · Geri Sayım</div>
+    <h1>YKS</h1>
+    <div class="dateline">20 Haziran 2026, Cumartesi — Saat 10:15</div>
+  </div>
+  <div id="main">
+    <div class="countdown">
+      <div class="unit"><span class="num" id="d">--</span><span class="lbl">Gün</span><span class="unit-sep">:</span></div>
+      <div class="unit"><span class="num" id="h">--</span><span class="lbl">Saat</span><span class="unit-sep">:</span></div>
+      <div class="unit"><span class="num" id="m">--</span><span class="lbl">Dakika</span><span class="unit-sep">:</span></div>
+      <div class="unit"><span class="num" id="s">--</span><span class="lbl">Saniye</span></div>
+    </div>
+    <div class="weeks">
+      <span class="wnum" id="w">--</span>
+      <span class="wtxt">hafta<br>kaldı</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const TARGET = new Date('2026-06-20T10:15:00');
+const THEME_COLORS = {gece:'#080810',sabah:'#fdf6ec',orman:'#080f0a',buz:'#f0f6ff',alev:'#0e0800'};
+
+function pad(n){return String(Math.floor(n)).padStart(2,'0');}
+function popIf(id,val){
+  const el=document.getElementById(id);
+  if(el.textContent!==val){el.textContent=val;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
+}
+function tick(){
+  const now=new Date(), diff=TARGET-now;
+  if(diff<=0){
+    document.getElementById('main').innerHTML=`<div class="done"><div class="done-icon">🎯</div><h2>Sınav Günü!</h2><p>Tüm hazırlıkların meyvesini topla. Başarılar!</p></div>`;
+    return;
+  }
+  const t=Math.floor(diff/1000);
+  popIf('d',pad(Math.floor(t/86400)));
+  popIf('h',pad(Math.floor((t%86400)/3600)));
+  popIf('m',pad(Math.floor((t%3600)/60)));
+  popIf('s',pad(t%60));
+  document.getElementById('w').textContent=Math.floor(Math.floor(t/86400)/7);
+}
+function setTheme(name,btn){
+  document.documentElement.setAttribute('data-theme',name);
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  localStorage.setItem('yks_theme',name);
+  document.getElementById('theme-color-meta').setAttribute('content',THEME_COLORS[name]);
+}
+(function(){
+  const s=localStorage.getItem('yks_theme');
+  if(s){
+    document.documentElement.setAttribute('data-theme',s);
+    document.querySelectorAll('.tbtn').forEach(b=>{
+      b.classList.toggle('on',b.getAttribute('onclick').includes("'"+s+"'"));
+    });
+    document.getElementById('theme-color-meta').setAttribute('content',THEME_COLORS[s]);
+  }
+})();
+tick();
+setInterval(tick,1000);
+
+// Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
